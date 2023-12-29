@@ -1,39 +1,67 @@
 import { ConnectButton } from "@mysten/dapp-kit";
+import { useSuiClient, useCurrentAccount } from '@mysten/dapp-kit';
+import { KioskClient, Network } from '@mysten/kiosk';
 import { Box, Container, Flex, Heading } from "@radix-ui/themes";
-import { WalletStatus } from "./WalletStatus";
+import { useState } from 'react';
+import './styles.css';
+
+import { useGetKiosks } from "./data"
+import { ManageKiosks } from "./components/ManageKiosks";
+// import { MintMonbobInKiosk } from "./components/MintMonbobInKiosk";
+import { MintMonbob } from "./components/ManageMonbob";
+
 
 function App() {
-  return (
-    <>
-      <Flex
-        position="sticky"
-        px="4"
-        py="2"
-        justify="between"
-        style={{
-          borderBottom: "1px solid var(--gray-a2)",
-        }}
-      >
-        <Box>
-          <Heading>dApp Starter Template</Heading>
-        </Box>
+    const client = useSuiClient();
+    const account = useCurrentAccount();
 
-        <Box>
-          <ConnectButton />
-        </Box>
-      </Flex>
-      <Container>
-        <Container
-          mt="5"
-          pt="2"
-          px="4"
-          style={{ background: "var(--gray-a2)", minHeight: 500 }}
-        >
-          <WalletStatus />
+    const [kiosks, setKiosks] = useState({ kioskOwnerCaps: [], kioskIds: [] });
+    const [selectedKiosk, setSelectedKiosk] = useState<number>();
+
+    const kioskClient = new KioskClient({
+        client,
+        network: Network.TESTNET,
+    });
+
+    useGetKiosks(account, kioskClient, setKiosks);
+
+    return (
+        <Container size="4" px="2">
+            <Flex
+                position="sticky"
+                py="2"
+                justify="between"
+                align="center"
+            >
+                <Box>
+                    <Heading>Kiosk Tone</Heading>
+                </Box>
+                <Box>
+                    <ConnectButton />
+                </Box>
+            </Flex>
+            <Container py="4">
+
+                <ManageKiosks
+                    kioskIds={kiosks.kioskIds}
+                    selectedKiosk={kiosks.kioskIds[selectedKiosk!]}
+                    setSelectedKiosk={setSelectedKiosk}
+                    kioskClient={kioskClient}
+                />
+
+                <MintMonbob
+                    account={account}
+                    selectedKioskCap={kiosks.kioskOwnerCaps[selectedKiosk!]}
+                    kioskClient={kioskClient}
+                />
+
+                {/* <MintMonbobInKiosk
+                    cap={kiosks.kioskOwnerCaps[selectedKiosk!]}
+                    kioskClient={kioskClient}
+                /> */}
+            </Container>
         </Container>
-      </Container>
-    </>
-  );
+    );
 }
 
 export default App;

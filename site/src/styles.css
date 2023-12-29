@@ -1,0 +1,31 @@
+
+button {
+    color: #000;
+    background-color: #fff;
+    padding: 0 24px;
+    min-width: 200px;
+    max-width: 280px;
+    height: 40px;
+    border-radius: 14px;
+    border: 2px solid #fff;
+    text-overflow: ellipsis;
+}
+.hashHeading {
+    max-width: 280px;
+    overflow:hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+button:hover {
+    background: rgb(190, 96, 96);
+
+}
+
+.monbobFrameButton {
+    height: 48px;
+    width: 100%;
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
+    border: none;
+    border-top: 2px solid #fff;
+}
