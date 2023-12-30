@@ -6,9 +6,9 @@ export const packageId = "0x5baa221eb91015d3063e8939fbb12d1f48423ecb0a8f87a54677
 export const monbobType = `${packageId}::kiosk_tone::Monbob`;
 
 const monbobs = [
-    "ipfs://QmazDrW6KQmAseduU3paZYri2Po423werDJxrbcXXcCiYS",
-    "ipfs://hQmPoabi8W7Nguow5Ff76ZT9zjRaJNJSJRhHTrFxaCVsYb4",
-    "ipfs://QmdLo4FS9oTjajnEaQMYq2T6vhj4kkF2JCLYoLo1gj4Yqa",
+    "QmazDrW6KQmAseduU3paZYri2Po423werDJxrbcXXcCiYS",
+    "QmPoabi8W7Nguow5Ff76ZT9zjRaJNJSJRhHTrFxaCVsYb4",
+    "QmdLo4FS9oTjajnEaQMYq2T6vhj4kkF2JCLYoLo1gj4Yqa",
 ]
 
 function getRandomInt(max: number) {
@@ -32,58 +32,24 @@ export function useGetKiosks(account: any | null, kioskClient: KioskClient, setK
     }, [account])
 }
 
-export function useGetKioskItems(id: string, kioskClient: KioskClient, setKioskItems: Function) {
+export function useGetKioskItems(kioskId: string, kioskClient: KioskClient, setKioskItems: Function) {
     useEffect(() => {
-        if (id == undefined || id == "") {
+        if (kioskId == undefined || kioskId == "") {
             return 
         }
         async function getKioskItems() {
             const res = await kioskClient.getKiosk({
-                id,
-                options: {
+                id: kioskId,
+                options: { // should maybe filter for monbobs here?
                     withKioskFields: true, // this flag also returns the `kiosk` object in the response, which includes the base setup
                     withListingPrices: true, // This flag enables / disables the fetching of the listing prices.
+                    withObjects: true,
                 }
             });
-            setKioskItems(res.items);
+            setKioskItems(res);
         }
         getKioskItems();
-    }, [id])
-}
-
-export interface MintMonbobProps {
-    signAndExecuteTransactionBlock: Function
-}
-
-export async function mintMonbob(props: MintMonbobProps) {
-
-    const gene = getRandomInt(3);
-
-	const txb = new TransactionBlock();
-
-	txb.moveCall({
-		target: `${packageId}::kiosk_tone::mint_monbob_to_sender`,
-		arguments: [
-            txb.pure(gene),
-            txb.pure(monbobs[gene]),
-        ],
-	});
-
-    await props.signAndExecuteTransactionBlock(
-        {
-            transactionBlock: txb,
-            chain: 'sui:testnet',
-        },
-        {
-            onSuccess: (result: any) => {
-                console.log('executed transaction block', result);
-                // setDigest(result.digest);
-            },
-            onerror: (err: any) => {
-                console.log(err)
-            }
-        },
-    );
+    }, [kioskId])
 }
 
 // export function useGetMonbob(account: any | null, data: any, setMonbobs: Function) {
@@ -106,41 +72,97 @@ export async function placeMonbonToKiosk(
     
     kioskTx
         .place({
-            itemType: monbobType,
             item: objectId,
+            itemType: monbobType,
         })
     
     // Always called as our last kioskTx interaction.
     kioskTx.finalize();
-    
+
     await signAndExecuteTransactionBlock(
         {
             transactionBlock: txb,
             chain: 'sui:testnet',
         },
         {
-            onSuccess: (result: any) => {
+            onSuccess: (result: { digest: any; }) => {
                 console.log('executed transaction block', result);
-                // setDigest(result.digest);
             },
-            onerror: (err: any) => {
-                console.log(err)
-            }
         },
     );
 }
 
-export interface MonbobFrameProps {
-    gene: number,
-    cap: KioskOwnerCap,
-    kioskClient: KioskClient
+export async function takeMonbonFromKiosk(
+    address: string | undefined,
+    objectId: string,
+    kioskClient: KioskClient,
+    kioskCap: KioskOwnerCap,
     signAndExecuteTransactionBlock: Function
+) {
+    if (address == undefined) {
+        return
+    }
+
+    /// Assume `kioskClient` and `cap` are supplied to the function as explained in the previous section.
+    const txb = new TransactionBlock();
+    const kioskTx = new KioskTransaction({ transactionBlock: txb, kioskClient, cap: kioskCap });
+    
+    // Take item from kiosk.
+    const item = kioskTx.take({
+        itemId: objectId,
+        itemType: monbobType,
+    });
+    
+    // Do something with `item`, like transfer it to someone else.
+    // transfer just back to me? looking for the inverse of place?
+    txb.transferObjects([item], address);
+    
+    // Finalize the kiosk Tx.
+    kioskTx.finalize();
+    
+    // Sign and execute transaction block.
+    await signAndExecuteTransactionBlock({ tx: txb });
 }
 
-export async function mintMonbobInKiosk(props: MonbobFrameProps) {
+//==== Minting Functions ====//
 
-    const kioskClient = props.kioskClient;
-    const cap = props.cap;
+export async function mintMonbob(signAndExecuteTransactionBlock: Function) {
+
+    const gene = getRandomInt(3); // should do this on-chain really.
+
+	const txb = new TransactionBlock();
+
+	txb.moveCall({
+		target: `${packageId}::kiosk_tone::mint_monbob_to_sender`,
+		arguments: [
+            txb.pure(gene),
+            txb.pure(monbobs[gene]),
+        ],
+	});
+
+    await signAndExecuteTransactionBlock(
+        {
+            transactionBlock: txb,
+            chain: 'sui:testnet',
+        },
+        {
+            onSuccess: (result: { digest: any; }) => {
+                console.log('executed transaction block', result);
+            },
+        },
+    );
+
+}
+
+// This doesnt work unsure what I've done...
+export async function mintMonbobInKiosk(
+    cap: KioskOwnerCap,
+    kioskClient: KioskClient,
+    signAndExecuteTransactionBlock: Function
+) {
+
+    const gene = getRandomInt(3); // should do this on-chain really.
+
 	const txb = new TransactionBlock();
 	const kioskTx = new KioskTransaction({ kioskClient, transactionBlock: txb, cap });
 
@@ -149,8 +171,8 @@ export async function mintMonbobInKiosk(props: MonbobFrameProps) {
 	txb.moveCall({
 		target: `${packageId}::kiosk_tone::mint_monbob_to_kiosk`,
 		arguments: [
-            txb.pure(props.gene),
-            txb.pure(monbobs[props.gene - 1]),
+            txb.pure(gene),
+            txb.pure(monbobs[gene]),
             kioskTx.getKiosk(),
             kioskTx.getKioskCap()
         ],
@@ -158,19 +180,15 @@ export async function mintMonbobInKiosk(props: MonbobFrameProps) {
     
     kioskTx.finalize();
  
-    await props.signAndExecuteTransactionBlock(
+    await signAndExecuteTransactionBlock(
         {
             transactionBlock: txb,
             chain: 'sui:testnet',
         },
         {
-            onSuccess: (result: any) => {
+            onSuccess: (result: { digest: any; }) => {
                 console.log('executed transaction block', result);
-                // setDigest(result.digest);
             },
-            onerror: (err: any) => {
-                console.log(err)
-            }
         },
     );
 }

@@ -1,19 +1,26 @@
 import { useState } from 'react';
 import { Container, Flex, Heading } from "@radix-ui/themes";
-import { KioskClient } from '@mysten/kiosk';
+import { KioskClient, KioskData, KioskOwnerCap } from '@mysten/kiosk';
 import '../styles.css'
 
-import { useGetKioskItems } from "../data"
+import { takeMonbonFromKiosk, useGetKioskItems } from "../data"
+import { MonbobFrameList } from './MonbobFrame';
+import { useSignAndExecuteTransactionBlock } from '@mysten/dapp-kit';
 
 interface ManageKiosksProps {
+    address: string | undefined,
     kioskIds: any,
     selectedKiosk: string,
+    selectedKioskCap: KioskOwnerCap,
     setSelectedKiosk: Function,
     kioskClient: KioskClient
 }
 
 export function ManageKiosks(props: ManageKiosksProps) {
-    const [kioskItems, setKioskItems] = useState([{objectId: "" }]);
+    
+    const { mutate: signAndExecuteTransactionBlock } = useSignAndExecuteTransactionBlock();
+
+    const [kioskItems, setKioskItems] = useState<KioskData>();
     useGetKioskItems(props.selectedKiosk, props.kioskClient, setKioskItems);
 
     const kiosks = props.kioskIds.map((id: string, i: number) => {
@@ -24,9 +31,18 @@ export function ManageKiosks(props: ManageKiosksProps) {
         )
     });
 
-    const items = kioskItems.map((item, i) => {
-        return <Heading key={i} size="2">{item.objectId}</Heading>
-    })
+    // const items = kioskItems?.items.map((item, i) => {
+    //     return <Heading key={i} size="2">{item.objectId}</Heading>
+    // })
+
+    
+    const onFrameButtonSubmit = (object: any) => takeMonbonFromKiosk(
+        props.address,
+        object.data?.objectId || "",
+        props.kioskClient,
+        props.selectedKioskCap,
+        signAndExecuteTransactionBlock
+    )
 
     return (
         <>
@@ -55,7 +71,14 @@ export function ManageKiosks(props: ManageKiosksProps) {
             <Heading size="4">Monbob in kiosk</Heading>
             <Container py="4">
                 <Flex gap="2">
-                    {items}
+                    {
+                        kioskItems != undefined
+                            ? <MonbobFrameList
+                                data={kioskItems}
+                                onFrameButtonSubmit={onFrameButtonSubmit}
+                            />
+                            : <></>
+                    }
                 </Flex>
             </Container>
         </>

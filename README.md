@@ -18,4 +18,4 @@ initialise a frontend with @mysten/dapp template, and uses the kiosk SDK. Will t
 pnpm create @mysten/dapp --template react-client-dapp
 ```
 
-project architecture need some work.
+project architecture need some work, mainly around handling data and signing and executing.  

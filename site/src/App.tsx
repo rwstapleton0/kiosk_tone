@@ -46,8 +46,10 @@ function App() {
             <Container py="4">
 
                 <ManageKiosks
+                    address={account?.address}
                     kioskIds={kiosks.kioskIds}
                     selectedKiosk={kiosks.kioskIds[selectedKiosk!]}
+                    selectedKioskCap={kiosks.kioskOwnerCaps[selectedKiosk!]}
                     setSelectedKiosk={setSelectedKiosk}
                     kioskClient={kioskClient}
                 />

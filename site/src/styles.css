@@ -6,7 +6,7 @@ button {
     min-width: 200px;
     max-width: 280px;
     height: 40px;
-    border-radius: 14px;
+    border-radius: 10px;
     border: 2px solid #fff;
     text-overflow: ellipsis;
 }
@@ -20,12 +20,8 @@ button:hover {
     background: rgb(190, 96, 96);
 
 }
+button:disabled {
+    background-color: #575757;
+    border: 2px solid #575757;
 
-.monbobFrameButton {
-    height: 48px;
-    width: 100%;
-    border-top-right-radius: 0;
-    border-top-left-radius: 0;
-    border: none;
-    border-top: 2px solid #fff;
 }
