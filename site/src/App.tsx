@@ -36,9 +36,12 @@ function App() {
                 <Box>
                     <Heading>Kiosk Tone</Heading>
                 </Box>
-                <Box>
+                <Flex align="center">
+                    <Container mr="4">
+                        <Heading className="hashHeading">{account?.address}</Heading>
+                    </Container>
                     <ConnectButton />
-                </Box>
+                </Flex>
             </Flex>
             <Container py="4">
 

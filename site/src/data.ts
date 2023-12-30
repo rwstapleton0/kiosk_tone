@@ -1,15 +1,14 @@
 import { useEffect } from 'react';
 import { KioskClient, KioskOwnerCap, KioskTransaction } from '@mysten/kiosk';
 import { TransactionBlock } from '@mysten/sui.js/transactions';
-import { useSuiClientQuery } from '@mysten/dapp-kit';
 
-const packageId = "0xe3b521dbda814a2fd8149956ebfd7fbda048adb58d39f6a91763e990aa86aecb";
-const monbobType = `${packageId}::kiosk_tone::Monbob`;
+export const packageId = "0x5baa221eb91015d3063e8939fbb12d1f48423ecb0a8f87a54677f1e3beae2d7c";
+export const monbobType = `${packageId}::kiosk_tone::Monbob`;
 
 const monbobs = [
-    "https://ipfs.io/ipfs/QmazDrW6KQmAseduU3paZYri2Po423werDJxrbcXXcCiYS",
-    "https://ipfs.io/ipfs/QmPoabi8W7Nguow5Ff76ZT9zjRaJNJSJRhHTrFxaCVsYb4",
-    "https://ipfs.io/ipfs/QmdLo4FS9oTjajnEaQMYq2T6vhj4kkF2JCLYoLo1gj4Yqa",
+    "ipfs://QmazDrW6KQmAseduU3paZYri2Po423werDJxrbcXXcCiYS",
+    "ipfs://hQmPoabi8W7Nguow5Ff76ZT9zjRaJNJSJRhHTrFxaCVsYb4",
+    "ipfs://QmdLo4FS9oTjajnEaQMYq2T6vhj4kkF2JCLYoLo1gj4Yqa",
 ]
 
 function getRandomInt(max: number) {

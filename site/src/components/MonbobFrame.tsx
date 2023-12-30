@@ -1,14 +1,11 @@
-import { Box, Container, Heading, Flex } from "@radix-ui/themes";
-import { useSuiClient } from '@mysten/dapp-kit';
-import { KioskClient, KioskOwnerCap, Network } from '@mysten/kiosk';
+import { Box, Container, Heading } from "@radix-ui/themes";
 import '../styles.css'
 
-
 export interface MonbobFrameProps {
+    url: string
     gene: number,
-    cap: KioskOwnerCap,
-    kioskClient: KioskClient
-    signAndExecuteTransactionBlock: Function
+    buttonText: string,
+    onButtonSumbit: Function,
 }
 
 export function MonbobFrame(props: MonbobFrameProps) {
@@ -27,7 +24,7 @@ export function MonbobFrame(props: MonbobFrameProps) {
                 <Heading size="8">#{name}</Heading>
                 <Box mt="2">
                     <img
-                        src={getImageUrl(name)}
+                        src={props.url}
                         alt={name}
                         style={{
                             padding: "0",
@@ -39,13 +36,9 @@ export function MonbobFrame(props: MonbobFrameProps) {
                 </Box>
             </Container>
             <button
-                onClick={() => mintKioskMonbob(props)}
+                onClick={() => props.onButtonSumbit}
                 className="monbobFrameButton"
-            ><Heading>Mint Monbob</Heading></button>
+            ><Heading>{props.buttonText}</Heading></button>
         </Box>
     )
-}
-
-function getImageUrl(name: String) {
-    return new URL(`../assets/${name}.png`, import.meta.url).href
 }

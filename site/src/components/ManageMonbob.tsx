@@ -5,7 +5,10 @@ import { Box, Container, Flex, Heading } from "@radix-ui/themes";
 import { MonbobFrame } from './MonbobFrame';
 import "../styles.css";
 
-import { mintMonbob, placeMonbonToKiosk } from '../data';
+import { mintMonbob, placeMonbonToKiosk, packageId } from '../data';
+
+// const packageId = "0xe3b521dbda814a2fd8149956ebfd7fbda048adb58d39f6a91763e990aa86aecb";
+const monbobType = `${packageId}::kiosk_tone::Monbob`;
 
 interface MintMonbobProps {
     account: any,
@@ -20,6 +23,12 @@ export function MintMonbob(props: MintMonbobProps) {
         "getOwnedObjects",
         {
             owner: props.account?.address as string,
+            filter: {
+                MoveModule: {
+                    module: "kiosk_tone",
+                    package: packageId,
+                }
+            }
         },
         {
             enabled: !!props.account,
@@ -51,7 +60,6 @@ export function MintMonbob(props: MintMonbobProps) {
 
                 <button onClick={() => mintMonbob({ signAndExecuteTransactionBlock })}><Heading size="5">Mint Monbob</Heading></button>
             </Container>
-
 
             <Heading size="4">Owned Monbobs - onclick =&gt; Place in selected kiosk</Heading>
             <Container py="2">
