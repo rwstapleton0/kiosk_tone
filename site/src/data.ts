@@ -9,10 +9,19 @@ const monbobs = [
     "QmazDrW6KQmAseduU3paZYri2Po423werDJxrbcXXcCiYS",
     "QmPoabi8W7Nguow5Ff76ZT9zjRaJNJSJRhHTrFxaCVsYb4",
     "QmdLo4FS9oTjajnEaQMYq2T6vhj4kkF2JCLYoLo1gj4Yqa",
+    "QmdGFukAX7xcRnBUCS3ZghkoqzNdQSZYLbZ59LBdzuAwAH",
+    "QmP6VFcV5LsPGZE36HwyAd8iH5bqDC7qdxz5B73cLdXWMg",
+    "QmXrb9zEJsM1noZxhjuRVdxomeU59tJM4CFv7gjkbZ4Niz",
+    "QmWCaZSoruxWQr1AvVQLxpxtNAyvV1cXfmsvhXZCKU8gbx",
+    "QmbecCVX7uYb7PzMz2sEzLbL354EXu8QcVQzjMoSveEBsx",
+    "QmXyk2jkedDf65CsGqLphsBbJuc46wTvmxXobEgsWtkCKb",
+    "QmPHZuuob76b5ZaHnU13eYEk9HjT62HmooNoXFsYP3JySs",
+    "QmaqpKCyJqR35YwYip1qqvqX3XfYnBnBW2vbBqugMqWXMQ",
+    "QmQB3ydvm4UDmTzh9aMbAd5BMyrhadExWJqzNfJySpQC6d",
 ]
 
-function getRandomInt(max: number) {
-    return Math.floor(Math.random() * max);
+function getRandomInt() {
+    return Math.floor(Math.random() * monbobs.length);
 }
 
 // Retieves all Kiosks and sets state with 'setKiosk'
@@ -121,14 +130,14 @@ export async function takeMonbonFromKiosk(
     kioskTx.finalize();
     
     // Sign and execute transaction block.
-    await signAndExecuteTransactionBlock({ tx: txb });
+    await signAndExecuteTransactionBlock({ transactionBlock: txb });
 }
 
 //==== Minting Functions ====//
 
 export async function mintMonbob(signAndExecuteTransactionBlock: Function) {
 
-    const gene = getRandomInt(3); // should do this on-chain really.
+    const gene = getRandomInt(); // should do this on-chain really.
 
 	const txb = new TransactionBlock();
 
@@ -161,12 +170,10 @@ export async function mintMonbobInKiosk(
     signAndExecuteTransactionBlock: Function
 ) {
 
-    const gene = getRandomInt(3); // should do this on-chain really.
+    const gene = getRandomInt(); // should do this on-chain really.
 
 	const txb = new TransactionBlock();
 	const kioskTx = new KioskTransaction({ kioskClient, transactionBlock: txb, cap });
-
-    console.log(cap)
 
 	txb.moveCall({
 		target: `${packageId}::kiosk_tone::mint_monbob_to_kiosk`,
@@ -193,33 +200,31 @@ export async function mintMonbobInKiosk(
     );
 }
 
-// function createKiosk() {
-//     if (address == null) {
-//         return 
-//     }
+export function createKiosk(
+    isPersonal: boolean,
+    address: string | undefined,
+    kioskClient: KioskClient,
+    signAndExecuteTransactionBlock: Function
+) {
+    if (address == undefined) {
+        return 
+    }
 
-//     const txb = new TransactionBlock();
-//     const kioskTx = new KioskTransaction({ transactionBlock: txb, kioskClient });
+    const txb = new TransactionBlock();
+    const kioskTx = new KioskTransaction({ transactionBlock: txb, kioskClient });
     
-//     // Calls the creation function.
-//     kioskTx.create();
+    // Calls the creation function.
+    if (isPersonal) {
+        kioskTx.createPersonal();
+    } else {
+        kioskTx.create();
+    }
     
-//     // Shares the kiosk and transfers the `KioskOwnerCap` to the owner.
-//     kioskTx.shareAndTransferCap(address);
+    // Shares the kiosk and transfers the `KioskOwnerCap` to the owner.
+    kioskTx.shareAndTransferCap(address);
     
-//     // Always called as our last kioskTx interaction.
-//     kioskTx.finalize();
+    // Always called as our last kioskTx interaction.
+    kioskTx.finalize();
 
-//     signAndExecuteTransactionBlock(
-//         {
-//             transactionBlock: txb,
-//             chain: 'sui:devnet',
-//         },
-//         {
-//             onSuccess: (result) => {
-//                 console.log('executed transaction block', result);
-//                 // setDigest(result.digest);
-//             },
-//         },
-//     );
-// }
+    signAndExecuteTransactionBlock({ transactionBlock: txb });
+}

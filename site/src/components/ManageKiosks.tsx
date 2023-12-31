@@ -3,9 +3,10 @@ import { Container, Flex, Heading } from "@radix-ui/themes";
 import { KioskClient, KioskData, KioskOwnerCap } from '@mysten/kiosk';
 import '../styles.css'
 
-import { takeMonbonFromKiosk, useGetKioskItems } from "../data"
-import { MonbobFrameList } from './MonbobFrame';
+import { createKiosk, takeMonbonFromKiosk, useGetKioskItems } from "../data"
+import { MonbobFrameList, reduceResponse } from './MonbobFrame';
 import { useSignAndExecuteTransactionBlock } from '@mysten/dapp-kit';
+import { SuiObjectData } from '@mysten/sui.js/client';
 
 interface ManageKiosksProps {
     address: string | undefined,
@@ -17,7 +18,7 @@ interface ManageKiosksProps {
 }
 
 export function ManageKiosks(props: ManageKiosksProps) {
-    
+
     const { mutate: signAndExecuteTransactionBlock } = useSignAndExecuteTransactionBlock();
 
     const [kioskItems, setKioskItems] = useState<KioskData>();
@@ -31,11 +32,11 @@ export function ManageKiosks(props: ManageKiosksProps) {
         )
     });
 
-    // const items = kioskItems?.items.map((item, i) => {
-    //     return <Heading key={i} size="2">{item.objectId}</Heading>
-    // })
+    let filteredData: SuiObjectData[] = []
+    if (kioskItems) {
+        filteredData = reduceResponse(kioskItems.items)
+    }
 
-    
     const onFrameButtonSubmit = (object: any) => takeMonbonFromKiosk(
         props.address,
         object.data?.objectId || "",
@@ -56,8 +57,18 @@ export function ManageKiosks(props: ManageKiosksProps) {
             <Heading size="4">New Kiosk</Heading>
             <Container py="2">
                 <Flex gap="2">
-                    <button><Heading size="5">Create Kiosk</Heading></button>
-                    <button><Heading size="5">Create Personal Kiosk</Heading></button>
+                    <button onClick={() => createKiosk(
+                        false,
+                        props.address,
+                        props.kioskClient,
+                        signAndExecuteTransactionBlock
+                    )}><Heading size="5">Create Kiosk</Heading></button>
+                    <button onClick={() => createKiosk(
+                        true,
+                        props.address,
+                        props.kioskClient,
+                        signAndExecuteTransactionBlock
+                    )}><Heading size="5">Create Personal Kiosk</Heading></button>
                 </Flex>
             </Container>
 
@@ -74,8 +85,9 @@ export function ManageKiosks(props: ManageKiosksProps) {
                     {
                         kioskItems != undefined
                             ? <MonbobFrameList
-                                data={kioskItems}
+                                data={filteredData}
                                 onFrameButtonSubmit={onFrameButtonSubmit}
+                                hoverButtonText={"Take from Kiosk"}
                             />
                             : <></>
                     }

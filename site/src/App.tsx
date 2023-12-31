@@ -7,9 +7,7 @@ import './styles.css';
 
 import { useGetKiosks } from "./data"
 import { ManageKiosks } from "./components/ManageKiosks";
-// import { MintMonbobInKiosk } from "./components/MintMonbobInKiosk";
-import { MintMonbob } from "./components/ManageMonbob";
-
+import { ManageMonbob } from "./components/ManageMonbob";
 
 function App() {
     const client = useSuiClient();
@@ -54,7 +52,7 @@ function App() {
                     kioskClient={kioskClient}
                 />
 
-                <MintMonbob
+                <ManageMonbob
                     account={account}
                     selectedKioskCap={kiosks.kioskOwnerCaps[selectedKiosk!]}
                     kioskClient={kioskClient}

@@ -1,9 +1,10 @@
-import { useSignAndExecuteTransactionBlock, useSuiClientQuery } from '@mysten/dapp-kit';
+import { useSignAndExecuteTransactionBlock, useSuiClientQuery, } from '@mysten/dapp-kit';
 import { KioskClient, KioskOwnerCap } from '@mysten/kiosk';
 import { Container, Flex, Heading } from "@radix-ui/themes";
 import "../styles.css";
 import { mintMonbob, placeMonbonToKiosk, packageId, mintMonbobInKiosk } from '../data';
-import { MonbobFrameList } from './MonbobFrame';
+import { MonbobFrameList, reduceResponse } from './MonbobFrame';
+import { SuiObjectData } from '@mysten/sui.js/client';
 
 interface MintMonbobProps {
     account: any,
@@ -11,7 +12,7 @@ interface MintMonbobProps {
     kioskClient: KioskClient,
 }
 
-export function MintMonbob(props: MintMonbobProps) {
+export function ManageMonbob(props: MintMonbobProps) {
     const { mutate: signAndExecuteTransactionBlock } = useSignAndExecuteTransactionBlock();
 
     const { data } = useSuiClientQuery(
@@ -23,12 +24,20 @@ export function MintMonbob(props: MintMonbobProps) {
                     module: "kiosk_tone",
                     package: packageId,
                 }
+            },
+            options: {
+                showDisplay: true
             }
         },
         {
             enabled: !!props.account,
         },
     );
+
+    let filteredData: SuiObjectData[] = []
+    if(data) {
+        filteredData = reduceResponse(data?.data)
+    }
 
     const onFrameButtonSubmit = (object: any) => placeMonbonToKiosk(
         object.data?.objectId || "",
@@ -49,8 +58,11 @@ export function MintMonbob(props: MintMonbobProps) {
                     </button>
                     <button
                         // disabled={true}
-                        onClick={() => mintMonbobInKiosk(props.selectedKioskCap,
-                            props.kioskClient, signAndExecuteTransactionBlock)}>
+                        onClick={() => mintMonbobInKiosk(
+                            props.selectedKioskCap,
+                            props.kioskClient,
+                            signAndExecuteTransactionBlock
+                        )}>
                         <Heading size="5">Mint Monbob In Kiosk</Heading>
                     </button>
                 </Flex>
@@ -59,14 +71,15 @@ export function MintMonbob(props: MintMonbobProps) {
             <Heading size="4">Owned Monbobs - onclick =&gt; Place in selected kiosk</Heading>
             <Container py="2">
                 <Flex gap="2" justify="between">
-                    {/* {
-                        data != undefined
+                    {
+                        filteredData != undefined
                             ? <MonbobFrameList
-                                data={data}
+                                data={filteredData}
                                 onFrameButtonSubmit={onFrameButtonSubmit}
+                                hoverButtonText={"Place in Kiosk"}
                             />
                             : <></>
-                    } */}
+                    }
                 </Flex>
             </Container>
         </>

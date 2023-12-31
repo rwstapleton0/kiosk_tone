@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Box, Container, Heading } from "@radix-ui/themes";
 import '../styles.css'
-import { PaginatedObjectsResponse } from "@mysten/sui.js/client";
-import { KioskData } from "@mysten/kiosk";
+import { PaginatedObjectsResponse, SuiObjectData, SuiObjectResponse } from "@mysten/sui.js/client";
+import { KioskData, KioskItem } from "@mysten/kiosk";
 
 export interface MonbobFrameProps {
     url: string
-    gene: number,
+    gene: string,
     buttonText: string,
     hoverButtonText: string | undefined,
     onButtonSumbit: Function
@@ -14,7 +14,7 @@ export interface MonbobFrameProps {
 
 export function MonbobFrame(props: MonbobFrameProps) {
     const [hovering, setHovering] = useState(props.buttonText)
-    const name = `Monbob${props.gene}`
+    // const name = `Monbob${props.gene}` setup display object wrong
     return (
         <Box
             style={{
@@ -25,11 +25,11 @@ export function MonbobFrame(props: MonbobFrameProps) {
             }}
         >
             <Container p="2">
-                <Heading size="8">#{name}</Heading>
+                <Heading size="8">#{props.gene}</Heading>
                 <Box my="2">
                     <img
                         src={props.url}
-                        alt={name}
+                        alt={props.gene}
                         style={{
                             padding: "0",
                             width: "252px",
@@ -64,24 +64,24 @@ export function MonbobFrame(props: MonbobFrameProps) {
 }
 
 interface MonbobFrameListProps {
-    data: KioskData,
-    // data: PaginatedObjectsResponse,
-    // data: PaginatedObjectsResponse | KioskData,
+    data: SuiObjectData[],
     onFrameButtonSubmit: Function,
+    hoverButtonText: string,
 }
 
 export function MonbobFrameList(props: MonbobFrameListProps) {
     // let monbobs = props.data.data.map((object: any, i: number) => {
+    // let items = typeof props.data == KioskData ? props.data.items : props.data.data;
 
-    let monbobs = props.data.items.map((object: any, i: number) => {
+    let monbobs = props.data.map((object: SuiObjectData, i: number) => {
         return (
             <MonbobFrame
                 key={i}
-                url={convertIpfsUrl(object.data?.display?.data?.image_url)}
+                url={convertIpfsUrl(object.display?.data?.image_url || "")}
                 buttonText={object.objectId} // should fix the or situations??
-                gene={0}
+                gene={object.display?.data?.gene || ""}
                 onButtonSumbit={() => props.onFrameButtonSubmit(object)}
-                hoverButtonText={"Take from Kiosk"}
+                hoverButtonText={props.hoverButtonText}
             />
         )
     })
@@ -89,6 +89,25 @@ export function MonbobFrameList(props: MonbobFrameListProps) {
     return (<>{monbobs}</>)
 }
 
+export function reduceResponse(objs: SuiObjectResponse[] | KioskItem[]): SuiObjectData[] {
+    let list: SuiObjectData[] = []
+    objs.forEach(obj => {
+        let data = getSuiObjectData(obj)
+        if (data != null) {
+            list.push(data)
+        }
+    });
+    return list
+}
+
+function getSuiObjectData(obj: SuiObjectResponse | KioskItem): SuiObjectData | null {
+    if (obj.data && obj.data !== undefined && obj.data !== null) { // a way to check type is correct or unnesseray?
+        return obj.data
+    }
+    return null
+}
+
+// should check if the browser supports ifps.
 function convertIpfsUrl(ipfsUrl: string): string {
     const ipfsPrefix = 'ipfs://';
     const httpGateway = 'https://ipfs.io/ipfs/';
