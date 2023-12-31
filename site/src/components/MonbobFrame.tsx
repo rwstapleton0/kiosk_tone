@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Box, Container, Heading } from "@radix-ui/themes";
 import '../styles.css'
-import { PaginatedObjectsResponse, SuiObjectData, SuiObjectResponse } from "@mysten/sui.js/client";
-import { KioskData, KioskItem } from "@mysten/kiosk";
+import { SuiObjectData, SuiObjectResponse } from "@mysten/sui.js/client";
+import { KioskItem } from "@mysten/kiosk";
 
 export interface MonbobFrameProps {
     url: string

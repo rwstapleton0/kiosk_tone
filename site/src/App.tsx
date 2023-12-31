@@ -58,10 +58,6 @@ function App() {
                     kioskClient={kioskClient}
                 />
 
-                {/* <MintMonbobInKiosk
-                    cap={kiosks.kioskOwnerCaps[selectedKiosk!]}
-                    kioskClient={kioskClient}
-                /> */}
             </Container>
         </Container>
     );
